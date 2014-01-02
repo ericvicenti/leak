@@ -28,7 +28,7 @@ $ leak --help
     -R, --release [type]              Cut a version (of a type like minor or patch), push to master, and close this branch
     --clean [do_clean]                Clean the feature branch and tags after release? Default [true]
     --clean-remote [do_clean_remote]  Clean the remote feature branch and tags after release? Default [true]
-    --npm-publish [do_npm_publish]    Should publish npm module if package.json public=true? Default [true]
+    --npm-publish [do_npm_publish]    Publish npm module on release? By default, publish if package.json private === false
     --main-branch [main_branch]       Specify the 'master' branch which gets released to. Default ['master']
     --remote [remote]                 Specify the remote repo to use. 'false' for no remote actions. Default ['origin']
 
@@ -83,7 +83,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 ### Commit Behavior
 
 * notices the current $repo & $branch
-* runs `git pull origin $branch`
+* `git pull origin $branch`
 * increments the prerelease $version in `package.json'
 * stages `package.json`
 * commits all staged changes with the $message provided
@@ -103,9 +103,9 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 ### Release Behavior
 
 * notices the current $repo & $branch
-* runs `git pull origin $branch`
+* `git pull origin $branch`
 * if branch is not `master`:
-  * runs `git pull origin master`
+  * `git pull origin master`
 * increments the $version by $type in `package.json'
 * stages `package.json`
 * commits all staged changes with the $message provided, otherwise 'release $type $version'
@@ -120,8 +120,8 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
     * if remote cleaning is enabled:
       * remove all remote tags which match: `X.X.X-$branch.X`
       * remove the remote $branch
-* if `public === true` in `package.json`:
-  * run `npm publish`
+* if `private === false` in `package.json` or if npm is enabled
+  * `npm publish`
 
 ### Release Options
 
@@ -129,4 +129,9 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 * `-C --commit [message]` - Override the commit message for the release
 * `--clean [do_clean]` - If set to `false`, no cleaning will be done
 * `--clean-remote [do_clean_remote]` - If set to `false`, nothing remote will be cleaned
-* `--npm-publish [do_npm_publish]` - If set to `false`, npm will not publish
+* `--npm-publish [do_npm_publish]`
+  * publish to npm if `true`
+  * if set to `false`, npm will not publish
+  * by default, publish if [private](https://npmjs.org/doc/files/package.json.html#private) is `false` in `package.json`
+
+

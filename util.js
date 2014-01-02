@@ -135,6 +135,17 @@ _.getRepo = function getRepo(path) {
   });
 }
 
+_.gitCheckout = function gitCheckout(repoPath, branchName) {
+  function checkoutDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', ['checkout', branchName], {
+    cwd: repoPath
+  }).then(checkoutDone, checkoutDone);
+}
+
+
 _.getRepoName = function getRepoName(path) {
   return _.getRepo(path).then(function(repoPath) {
     if (repoPath) return _.path.basename(repoPath);

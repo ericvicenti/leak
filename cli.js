@@ -8,11 +8,11 @@ module.exports = function(leak) {
     .option('-S, --start [name]', 'Start working on a branch, synced with origin, and properly versioned')
     .option('-C, --commit [message]', 'Commit progress on this branch')
     .option('-R, --release [type]', 'Cut a version (of a type like minor or patch), push to master, and close this branch')
-    .option('--clean [do_clean]', 'Clean the feature branch and tags after release? Default [true]')
-    .option('--clean-remote [do_clean_remote]', 'Clean the remote feature branch and tags after release? Default [true]')
-    .option('--npm-publish [do_npm_publish]', 'Should publish npm module if package.json public=true? Default [true]')
-    .option('--main-branch [branch]', "Specify the 'master' branch which gets released to. Default ['master']")
-    .option('--remote [remote]', "Specify the remote repo to use. 'false' for no remote actions. Default ['origin']")
+    .option('--clean [do_clean]', 'Clean the feature branch and tags after release? Default [true]', true)
+    .option('--clean-remote [do_clean_remote]', 'Clean the remote feature branch and tags after release? Default [true]', true)
+    .option('--npm-publish [do_npm_publish]', 'Publish npm module on release? By default, publish if package.json private === false')
+    .option('--main-branch [main_branch]', "Specify the 'master' branch which gets released to. Default ['master']", 'master')
+    .option('--remote [remote]', "Specify the remote repo to use. 'false' for no remote actions. Default ['origin']", 'origin')
     .parse(process.argv);
 
   if (leakCli.start) {
@@ -29,7 +29,10 @@ module.exports = function(leak) {
 
     console.log('LEAK STARTING "'+ branchName + '" ...');
 
-    leak.start(null, branchName).progress(function(m) {
+    leak.start(branchName, {
+      main_branch: leakCli.main_branch,
+      remote: leakCli.remote
+    }).progress(function(m) {
       console.log('LEAK:', m);
     }).done(function() {
       console.log('LEAK START "'+branchName+'" DONE!');

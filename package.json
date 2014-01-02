@@ -8,6 +8,8 @@
     "type": "git",
     "url": "https://github.com/ericvicenti/leak.git"
   },
+  "preferGlobal": true,
+  "private": false,
   "dependencies": {
     "q": "0.9.x",
     "underscore": "1.5.x",
