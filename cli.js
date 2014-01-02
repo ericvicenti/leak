@@ -31,7 +31,8 @@ module.exports = function(leak) {
 
     leak.start(branchName, {
       main_branch: leakCli.main_branch,
-      remote: leakCli.remote
+      remote: leakCli.remote,
+      message: 'dude'
     }).progress(function(m) {
       console.log('LEAK:', m);
     }).done(function() {

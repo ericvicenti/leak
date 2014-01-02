@@ -52,15 +52,23 @@ function exec(command, args, opts) {
   return doExec.promise;
 }
 
-_.packageJsonGet = function packageJsonGet(projectPath) {
-  var packageJsonFileLocation = _.path.join(projectPath, 'package.json');
+_.packageJsonGet = function packageJsonGet(repoPath) {
+  var packageJsonFileLocation = _.path.join(repoPath, 'package.json');
   return fsReadJson(packageJsonFileLocation).then(function(packageJson) {
     return packageJson;
   });
 }
-_.packageJsonSave = function packageJsonSave(projectPath, packageJson) {
-  var packageJsonFileLocation = _.path.join(projectPath, 'package.json');
+_.packageJsonSave = function packageJsonSave(repoPath, packageJson) {
+  var packageJsonFileLocation = _.path.join(repoPath, 'package.json');
   return fsWriteJson(packageJsonFileLocation, packageJson);
+}
+_.packageJsonStage = function packageJsonStage(repoPath) {
+  return _.gitAdd(repoPath, 'package.json');
+}
+
+_.getBranchVersion = function(version, branchName) {
+  var vParts = version.split('-');
+  return vParts[0] + '-' + branchName + '.0';
 }
 _.versionGet = function versionGet() {
   return _.packageJsonGet().then(function(packageJson) {
@@ -72,6 +80,14 @@ _.versionSet = function versionSet(version) {
     packageJson.version = version;
     return _.packageJsonSave(packageJson);
   });
+}
+_.versionSetBranch = function versionSetBranch(repoPath, branchName) {
+   return _.packageJsonGet(repoPath).then(function(packageJson) {
+    var newVersion = packageJson.version = _.getBranchVersion(packageJson.version, branchName);
+    return _.packageJsonSave(repoPath, packageJson).then(function() {
+      return newVersion;
+    });
+  }); 
 }
 _.versionIncr = function versionIncr(type) {
   // type can be major, minor, patch, or prerelase (from semver)
@@ -124,7 +140,6 @@ _.checkIfGitRepo = function checkIfGitRepo(path) {
 
 _.getRepo = function getRepo(path) {
   if(!path) path = process.cwd();
-
   return _.checkIfGitRepo(path).then(function(isRepo) {
     if (isRepo) return path;
     else {
@@ -135,16 +150,75 @@ _.getRepo = function getRepo(path) {
   });
 }
 
+_.gitPull = function gitPull(repoPath, originName, remoteBranchName) {
+  function pullDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'pull', originName, remoteBranchName ], {
+    cwd: repoPath
+  }).then(pullDone, pullDone);
+}
+
+_.gitCommit = function gitCommit(repoPath, message) {
+  function commitDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'commit', '-m', message ], {
+    cwd: repoPath
+  }).then(commitDone, commitDone);
+}
+
+_.gitAdd = function gitAdd(repoPath, fileName) {
+  function addDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'add', fileName ], {
+    cwd: repoPath
+  }).then(addDone, addDone);
+}
+
+_.gitPush = function gitPush(repoPath, originName, remoteBranchName) {
+  function pushDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'push', originName, branchName ], {
+    cwd: repoPath
+  }).then(pushDone, pushDone);
+}
+
 _.gitCheckout = function gitCheckout(repoPath, branchName) {
   function checkoutDone(out) {
     if (out.code == 0) return;
     else throw new Error(out.stderr);
   }
-  return exec('git', ['checkout', branchName], {
+  return exec('git', [ 'checkout', branchName ], {
     cwd: repoPath
   }).then(checkoutDone, checkoutDone);
 }
 
+_.gitNewBranch = function gitCheckout(repoPath, branchName) {
+  function newBranchDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'checkout', '-b', branchName ], {
+    cwd: repoPath
+  }).then(newBranchDone, newBranchDone);
+}
+
+_.gitSetBranchTracking = function gitSetBranchTracking(repoPath, originName, remoteBranchName) {
+  function setBranchDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'branch', '--set-upstream-to', originName + '/' + remoteBranchName ], {
+    cwd: repoPath
+  }).then(setBranchDone, setBranchDone);
+}
 
 _.getRepoName = function getRepoName(path) {
   return _.getRepo(path).then(function(repoPath) {
@@ -172,3 +246,4 @@ _.checkPush = function checkPush(repoPath, remote, branch) {
     cwd: repoPath
   }).then(checkPushDone, checkPushDone);
 }
+

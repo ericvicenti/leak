@@ -60,7 +60,8 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 ### Start Behavior
 
 * tries to checkout $branch. if it already exists and is checked out:
-  * run `git pull origin $branch`
+  * try to run `git pull origin $branch`. if the branch does not exist remotely:
+    * continue as if the branch had been just created (see below) 
 * if the branch doesnt already exist:
   * creates a new branch named $branch off of the current git repo
   * set to track $branch on `origin`. if branch is successfully tracked:
