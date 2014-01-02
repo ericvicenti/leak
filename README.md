@@ -38,7 +38,7 @@ $ leak --help
 
 Other than the following restrictions, leak should work fine with existing repositories.
 
-Leak can be run inside of a properly configured repository. The repo must have `master` as the main branch, and `origin` as the main remote.
+Leak can be run anywhere inside of a properly configured repository.
 
 The `package.json` file must be present at the top-level of the repo and be valid JSON. The `version` value must be a proper [semantic version](http://semver.org/).
 
@@ -47,7 +47,7 @@ The `package.json` file must be present at the top-level of the repo and be vali
 
 Leak has 3 main actions: Start, Commit, and Release.
 
-Release and commit can be combined because a commit always happens on a succesful release. Start must be used independently.
+Release and commit can be combined because a commit always happens on a release. Start must be used independently.
 
 Leak will run 'Commit' (`-C`) by default if nothing is provided.
 
@@ -55,9 +55,9 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 
 ## -S --start [branch]
 
-> Start working on a new or existing branch
+"Switch to a new or existing branch"
 
-### Exact Behavior
+### Behavior
 
 * tries to checkout $branch. if it already exists and is checked out:
   * run `git pull origin $branch`
@@ -67,6 +67,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
     * git pull
   * if branch cannot track remote because no remote branch:
     * updates version for the branch in `package.json` to match `X.X.X-$branch.X`
+    * stages and commits `package.json`
     * publishes the new branch to `origin`
 
 ### Options
@@ -77,11 +78,9 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 
 ## -C --commit [message]
 
-> Commit progress on the current branch.
+"Commit progress on the current branch."
 
-Pull from remote, commit staged to repo with incremented version, tags with version, pushes to remote.
-
-### Exact Behavior
+### Behavior
 
 * notices the current $repo & $branch
 * runs `git pull origin $branch`
@@ -99,11 +98,9 @@ Pull from remote, commit staged to repo with incremented version, tags with vers
 
 ## -R --release [type]
 
-> Make a release of the current branch to master and npm
+"Release the current branch to remote master and npm"
 
-Closes the current feature branch (if any), increments the version, tags with version, pushes to remote master, cleans up the feature branch, and publishes to npm.
-
-### Exact Behavior
+### Behavior
 
 * notices the current $repo & $branch
 * runs `git pull origin $branch`
