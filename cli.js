@@ -11,6 +11,8 @@ module.exports = function(leak) {
     .option('--clean [do_clean]', 'Clean the feature branch and tags after release? Default [true]')
     .option('--clean-remote [do_clean_remote]', 'Clean the remote feature branch and tags after release? Default [true]')
     .option('--npm-publish [do_npm_publish]', 'Should publish npm module if package.json public=true? Default [true]')
+    .option('--main-branch [branch]', "Specify the 'master' branch which gets released to. Default ['master']")
+    .option('--remote [remote]', "Specify the remote repo to use. 'false' for no remote actions. Default ['origin']")
     .parse(process.argv);
 
   if (leakCli.start) {
@@ -27,10 +29,10 @@ module.exports = function(leak) {
 
     console.log('LEAK STARTING "'+ branchName + '" ...');
 
-    leak.start(null, branchName).done(function() {
-      console.log('LEAK START "'+branchName+'" DONE!');
-    }).progress(function(m) {
+    leak.start(null, branchName).progress(function(m) {
       console.log('LEAK:', m);
+    }).done(function() {
+      console.log('LEAK START "'+branchName+'" DONE!');
     });
 
     return; // end start section
@@ -55,20 +57,20 @@ module.exports = function(leak) {
 
     console.log('LEAK RELEASING '+releaseType);
 
-    leak.release(null, releaseType, message).done(function() {
-      console.log('LEAK RELEASE '+releaseType+' DONE!');
-    }).progress(function(m) {
+    leak.release(null, releaseType, message).progress(function(m) {
       console.log('LEAK:', m);
+    }).done(function() {
+      console.log('LEAK RELEASE '+releaseType+' DONE!');
     });
 
   } else {
 
     console.log('LEAK COMMITTING '+message);
 
-    leak.commit(null, message).done(function() {
-      console.log('LEAK COMMIT DONE!');
-    }).progress(function(m) {
+    leak.commit(null, message).progress(function(m) {
       console.log('LEAK:', m);
+    }).done(function() {
+      console.log('LEAK COMMIT DONE!');
     });
   }
 

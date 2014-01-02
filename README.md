@@ -29,6 +29,8 @@ $ leak --help
     --clean [do_clean]                Clean the feature branch and tags after release? Default [true]
     --clean-remote [do_clean_remote]  Clean the remote feature branch and tags after release? Default [true]
     --npm-publish [do_npm_publish]    Should publish npm module if package.json public=true? Default [true]
+    --main-branch [branch]            Specify the 'master' branch which gets released to. Default ['master']
+    --remote [remote]                 Specify the remote repo to use. 'false' for no remote actions. Default ['origin']
 
 ```
 
@@ -43,7 +45,19 @@ The `package.json` file must be present at the top-level of the repo and be vali
 
 # Commands
 
+Leak has 3 main actions: Start, Commit, and Release.
+
+Release and commit can be combined because a commit always happens on a succesful release. Start must be used independently.
+
+Leak will run 'Commit' (`-C`) by default if nothing is provided.
+
+
+
 ## -S --start [branch]
+
+> Start working on a new or existing branch
+
+### Exact Behavior
 
 * tries to checkout $branch. if it already exists and is checked out:
   * run `git pull origin $branch`
@@ -60,7 +74,14 @@ The `package.json` file must be present at the top-level of the repo and be vali
 * `-S --start [branch_name]` - Specify the name for the branch
 
 
+
 ## -C --commit [message]
+
+> Commit progress on the current branch.
+
+Pull from remote, commit staged to repo with incremented version, tags with version, pushes to remote.
+
+### Exact Behavior
 
 * notices the current $repo & $branch
 * runs `git pull origin $branch`
@@ -75,7 +96,14 @@ The `package.json` file must be present at the top-level of the repo and be vali
 * `-C --commit [message]` - Set the commit message
 
 
+
 ## -R --release [type]
+
+> Make a release of the current branch to master and npm
+
+Closes the current feature branch (if any), increments the version, tags with version, pushes to remote master, cleans up the feature branch, and publishes to npm.
+
+### Exact Behavior
 
 * notices the current $repo & $branch
 * runs `git pull origin $branch`
@@ -87,7 +115,7 @@ The `package.json` file must be present at the top-level of the repo and be vali
 * tag the commit with the new version
 * pushes commits on $branch and the tag to `origin`
 * if $branch is not `master`:
-  * push branch to `origin master`
+  * push $branch to `origin master`
   * checkout `master`, pull `origin master`
   * if cleaning is enabled:
     * remove all local tags which match: `X.X.X-$branch.X`
@@ -98,7 +126,6 @@ The `package.json` file must be present at the top-level of the repo and be vali
 * if `public === true` in `package.json`:
   * run `npm publish`
 
-
 ### Options
 
 * `-R --release [type]` - Specify the type of the release
@@ -106,11 +133,3 @@ The `package.json` file must be present at the top-level of the repo and be vali
 * `--clean [do_clean]` - If set to `false`, no cleaning will be done
 * `--clean-remote [do_clean_remote]` - If set to `false`, nothing remote will be cleaned
 * `--npm-publish [do_npm_publish]` - If set to `false`, npm will not publish
-
-
-## Defaults / Config
-
-The default git remote is `origin` and the default HEAD branch is `master`
-
-Leak is not yet configurable. (But the source code is very simple, at least!)
-
