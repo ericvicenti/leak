@@ -6,6 +6,9 @@ _.fs = require('fs');
 _.semver = require('semver');
 _.str = require('underscore.string');
 
+_.pkg = JSON.parse(_.fs.readFileSync(_.path.join(__dirname, 'package.json'), { encoding: 'utf8' }));
+
+
 var spawn = require('child_process').spawn;
 
 var fsReadFile = _.Q.denodeify(_.fs.readFile);
