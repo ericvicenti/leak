@@ -29,7 +29,7 @@ $ leak --help
     --clean [do_clean]                Clean the feature branch and tags after release? Default [true]
     --clean-remote [do_clean_remote]  Clean the remote feature branch and tags after release? Default [true]
     --npm-publish [do_npm_publish]    Should publish npm module if package.json public=true? Default [true]
-    --main-branch [branch]            Specify the 'master' branch which gets released to. Default ['master']
+    --main-branch [main_branch]       Specify the 'master' branch which gets released to. Default ['master']
     --remote [remote]                 Specify the remote repo to use. 'false' for no remote actions. Default ['origin']
 
 ```
@@ -57,7 +57,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 
 "Switch to a new or existing branch"
 
-### Behavior
+### Start Behavior
 
 * tries to checkout $branch. if it already exists and is checked out:
   * run `git pull origin $branch`
@@ -70,7 +70,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
     * stages and commits `package.json`
     * publishes the new branch to `origin`
 
-### Options
+### Start Options
 
 * `-S --start [branch_name]` - Specify the name for the branch
 
@@ -80,7 +80,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 
 "Commit progress on the current branch."
 
-### Behavior
+### Commit Behavior
 
 * notices the current $repo & $branch
 * runs `git pull origin $branch`
@@ -90,7 +90,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 * tags the commit with the new version
 * pushes commits and tags to `origin $branch`
 
-### Options
+### Commit Options
 
 * `-C --commit [message]` - Set the commit message
 
@@ -100,7 +100,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 
 "Release the current branch to remote master and npm"
 
-### Behavior
+### Release Behavior
 
 * notices the current $repo & $branch
 * runs `git pull origin $branch`
@@ -123,7 +123,7 @@ Leak will run 'Commit' (`-C`) by default if nothing is provided.
 * if `public === true` in `package.json`:
   * run `npm publish`
 
-### Options
+### Release Options
 
 * `-R --release [type]` - Specify the type of the release
 * `-C --commit [message]` - Override the commit message for the release
