@@ -275,9 +275,9 @@ leak.release = function leakRelease(type, opts) {
 
   function goBranchCleanRemote(repo, branch, version) {
     notify('cleaning remote');
-    return _.deleteRemoteBranchTags(repo, branch).then(function(tags) {
+    return _.deleteRemoteBranchTags(repo, opts.remote, branch).then(function(tags) {
       notify('Removed '+tags.length+' remote tags with "'+branch+'" label.')
-      return _.deleteRemoteBranch(repo, branch).then(function() {
+      return _.deleteRemoteBranch(repo, opts.remote, branch).then(function() {
         notify('Removed remote branch "'+branch+'"');
         return goBranchClean(repo, branch, version);
       });

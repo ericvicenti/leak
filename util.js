@@ -353,7 +353,7 @@ _.deleteBranchTags = function deleteBranchTags(repoPath, branch) {
   });
 }
 
-_.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, branch, remote) {
+_.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, remote, branch) {
   return _.getTags(repoPath).then(function(myTags) {
     console.log('GOT MYTAGS: '+myTags);
     return _.getAllTags(repoPath, remote).then(function(allTags) {
