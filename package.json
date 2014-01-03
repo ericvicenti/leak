@@ -1,6 +1,6 @@
 {
   "name": "leak",
-  "version": "0.0.21-try-publish.0",
+  "version": "0.0.21-try-publish.1",
   "main": "leak.js",
   "author": "Eric Vicenti <ericvicenti@gmail.com>",
   "description": "Leak helps release semantically-versioned node packages from git branches.",
@@ -9,7 +9,7 @@
     "url": "https://github.com/ericvicenti/leak.git"
   },
   "preferGlobal": true,
-  "private": true,
+  "private": false,
   "dependencies": {
     "q": "0.9.x",
     "underscore": "1.5.x",
