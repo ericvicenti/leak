@@ -16,9 +16,7 @@ module.exports = function(leak) {
     .parse(process.argv);
 
   if (leakCli.start) {
-    if (leakCli.commit) {
-      throw new Error('Cannot start and commit at the same time!');
-    }
+
     if (leakCli.release) {
       throw new Error('Cannot start and release at the same time!');
     }
@@ -27,12 +25,12 @@ module.exports = function(leak) {
 
     var branchName = leakCli.start;
 
-    console.log('LEAK STARTING "'+ branchName + '" ...');
+    console.log('LEAK STARTING "'+ leakCli.commit + '" ...');
 
     leak.start(branchName, {
       main_branch: leakCli.main_branch,
       remote: leakCli.remote,
-      message: 'dude'
+      message: leakCli.commit
     }).progress(function(m) {
       console.log('LEAK:', m);
     }).done(function() {
@@ -71,7 +69,11 @@ module.exports = function(leak) {
 
     console.log('LEAK COMMITTING '+message);
 
-    leak.commit(null, message).progress(function(m) {
+    leak.commit({
+      main_branch: leakCli.main_branch,
+      remote: leakCli.remote,
+      message: leakCli.commit
+    }).progress(function(m) {
       console.log('LEAK:', m);
     }).done(function() {
       console.log('LEAK COMMIT DONE!');

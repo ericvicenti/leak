@@ -47,9 +47,9 @@ The `package.json` file must be present at the top-level of the repo and be vali
 
 Leak has 3 main actions: Start, Commit, and Release.
 
-Release and commit can be combined because a commit always happens on a release. Start must be used independently.
-
 Leak will run 'Commit' (`-C`) by default if nothing is provided.
+
+Commit can be combined with start or release, because a commit always happens to change the version. When starting or releasing, the commit flag is used to override the message.
 
 
 

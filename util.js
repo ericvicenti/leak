@@ -68,38 +68,47 @@ _.packageJsonStage = function packageJsonStage(repoPath) {
 
 _.getBranchVersion = function(version, branchName) {
   var vParts = version.split('-');
-  return vParts[0] + '-' + branchName + '.0';
+  var newVersion = vParts[0] + '-' + branchName + '.0';
+  return newVersion;
 }
-_.versionGet = function versionGet() {
-  return _.packageJsonGet().then(function(packageJson) {
+_.versionGet = function versionGet(repoPath) {
+  return _.packageJsonGet(repoPath).then(function(packageJson) {
     return packageJson.version;
   });
 }
-_.versionSet = function versionSet(version) {
-  return _.packageJsonGet().then(function(packageJson) {
+_.versionSet = function versionSet(repoPath, version) {
+  return _.packageJsonGet(repoPath).then(function(packageJson) {
     packageJson.version = version;
     return _.packageJsonSave(packageJson);
   });
 }
 _.versionSetBranch = function versionSetBranch(repoPath, branchName) {
    return _.packageJsonGet(repoPath).then(function(packageJson) {
-    var newVersion = packageJson.version = _.getBranchVersion(packageJson.version, branchName);
+    var oldVersion = packageJson.version;
+    var newVersion = _.getBranchVersion(packageJson.version, branchName);
+    if (newVersion == oldVersion) {
+      throw new Error('Cannot set duplicate version "'+newVersion+'"!');
+    }
+    packageJson.version = newVersion;
     return _.packageJsonSave(repoPath, packageJson).then(function() {
       return newVersion;
     });
   }); 
 }
-_.versionIncr = function versionIncr(type) {
+_.versionIncr = function versionIncr(repoPath, type) {
   // type can be major, minor, patch, or prerelase (from semver)
-  return _.packageJsonGet().then(function(packageJson) {
+  return _.packageJsonGet(repoPath).then(function(packageJson) {
     var version = packageJson.version;
-    packageJson.version = _.semver.inc(version, type);
-    return _.packageJsonSave(packageJson);
+    var newVersion = _.semver.inc(version, type);
+    packageJson.version = newVersion;
+    return _.packageJsonSave(repoPath, packageJson).then(function() {
+      return newVersion;
+    });
   });
 }
-_.tagsGet = function getTags() {
+_.tagsGet = function getTags(repoPath) {
   return exec('git', ['tag'], {
-    cwd: mainRepoFolder
+    cwd: repoPath
   }).then(function(results) {
     var out = results.stdout;
     var tags = out.split('\n');
@@ -185,7 +194,17 @@ _.gitPush = function gitPush(repoPath, originName, remoteBranchName) {
     if (out.code == 0) return;
     else throw new Error(out.stderr);
   }
-  return exec('git', [ 'push', originName, branchName ], {
+  return exec('git', [ 'push', originName, remoteBranchName ], {
+    cwd: repoPath
+  }).then(pushDone, pushDone);
+}
+
+_.gitPushTag = function gitPushTag(repoPath, originName, tagName) {
+  function pushDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'push', originName, tagName ], {
     cwd: repoPath
   }).then(pushDone, pushDone);
 }
