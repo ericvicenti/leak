@@ -15,6 +15,10 @@ module.exports = function(leak) {
     .option('--remote [remote]', "Specify the remote repo to use. 'false' for no remote actions. Default ['origin']", 'origin')
     .parse(process.argv);
 
+  _.each(['clean', 'cleanRemote', 'npmPublish', 'remote'], function(attr) {
+    if (leakCli[attr] === 'false') leakCli[attr] = false;
+  });
+
   if (leakCli.start) {
 
     if (leakCli.release) {
@@ -59,7 +63,14 @@ module.exports = function(leak) {
 
     console.log('LEAK RELEASING '+releaseType);
 
-    leak.release(null, releaseType, message).progress(function(m) {
+    leak.release(releaseType, {
+      mainBranch: leakCli.mainBranch,
+      remote: leakCli.remote,
+      message: leakCli.commit,
+      doClean: leakCli.clean,
+      doCleanRemote: leakCli.cleanRemote,
+      doNpmPublish: leakCli.npmPublish
+    }).progress(function(m) {
       console.log('LEAK:', m);
     }).done(function() {
       console.log('LEAK RELEASE '+releaseType+' DONE!');

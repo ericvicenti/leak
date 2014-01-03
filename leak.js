@@ -104,7 +104,7 @@ leak.start = function leakStart(branchName, opts) {
         return _.gitPush(repo, opts.remote, branchName).then(function() {
           notify('Pushed to "'+opts.remote+'/'+branchName+'"');
           return _.gitPushTag(repo, opts.remote, version).then(function() {
-            notify('Pushed tag "'+version+'" to "'+opts.remote+'/'+branchName+'"');
+            notify('Pushed tag "'+version+'" to "'+opts.remote+'"');
             return;
           });
         });
@@ -127,14 +127,6 @@ leak.commit = function leakCommit(opts) {
     }
   */
 
-//   notices the current $repo & $branch
-// runs git pull origin $branch
-// increments the prerelease $version in `package.json’
-// stages package.json
-// commits all staged changes with the $message provided
-// tags the commit with the new version
-// pushes commits and tags to origin $branch
-
   opts = opts || {};
 
   var doLeakCommit = _.Q.defer();
@@ -142,16 +134,37 @@ leak.commit = function leakCommit(opts) {
 
   _.getRepo(opts.repo).then(function(repo) {
     return _.getBranchName(repo).then(function(branch) {
-      notify('Working with '+repo+' on '+branch );
+      notify('Will commit '+repo+' on '+branch );
       return _.gitPull(repo, opts.remote, branch).then(function() {
         notify('Done with git pull');
         return _.versionIncr(repo, 'prerelease').then(function(version) {
           notify('Incremented to '+version );
-
+          return _.packageJsonStage(repo).then(function() {
+            notify('Staged package.json');
+            return commitTagPush(repo, branch, version);
+          });
         });
       });
     });
   }).then(doLeakCommit.resolve, doLeakCommit.reject);
+
+  function commitTagPush(repo, branch, version) {
+    var message = opts.message ? opts.message : version;
+    return _.gitCommit(repo, message).then(function() {
+      notify('Committed "'+message+'" ('+version+') to "'+branch+'"');
+      return _.tagsMake(repo, version).then(function() {
+        notify('Tagged "'+version+'"');
+        return _.gitPush(repo, opts.remote, branch).then(function() {
+          notify('Pushed to "'+opts.remote+'/'+branch+'"');
+          return _.gitPushTag(repo, opts.remote, version).then(function() {
+            notify('Pushed tag "'+version+'" to "'+opts.remote+'"');
+            return;
+          });
+        });
+      });
+    });
+  }
+
 
   return doLeakCommit.promise;
 }
@@ -164,9 +177,106 @@ leak.release = function leakRelease(type, opts) {
       main_branch: ,
     }
   */
+  /*
+
+    * notices the current $repo & $branch
+    * `git pull origin $branch`
+    * if branch is not `master`:
+      * `git pull origin master`
+    * increments the $version by $type in `package.json'
+    * stages `package.json`
+    * commits all staged changes with the $message provided, otherwise 'release $type $version'
+    * tag the commit with the new version
+    * pushes commits on $branch and the tag to `origin`
+    * if $branch is not `master`:
+      * push $branch to `origin master`
+      * checkout `master`, pull `origin master`
+      * if cleaning is enabled:
+        * remove all local tags which match: `X.X.X-$branch.X`
+        * remove the local $branch
+        * if remote cleaning is enabled:
+          * remove all remote tags which match: `X.X.X-$branch.X`
+          * remove the remote $branch
+    * if `private === false` in `package.json` or if npm is enabled
+      * `npm publish`
+
+  */
   opts = opts || {};
 
-  return _.getRepo(opts.repo);
+  console.log('aa', opts);
+  var doLeakRelease = _.Q.defer();
+  var notify = doLeakRelease.notify;
+
+  _.getRepo(opts.repo).then(function(repo) {
+    return _.getBranchName(repo).then(function(branch) {
+      notify('Releasing '+branch+' of '+repo );
+      return _.gitPull(repo, opts.remote, branch).then(function() {
+        notify('Done with git pull '+opts.remote+' '+branch);
+        if (branch == opts.mainBranch) {
+          return releaseVersion(repo, branch);
+        } else {
+          return _.gitPull(repo, opts.remote, opts.mainBranch).then(function() {
+            return releaseVersion(repo, branch);
+          });
+        }
+      });
+    });
+  }).then(doLeakRelease.resolve, doLeakRelease.reject);
+
+  function releaseVersion(repo, branch) {
+    return _.versionIncr(repo, type).then(function(version) {
+      notify('Incremented to '+version);
+      return _.packageJsonStage(repo).then(function() {
+        notify('Staged package.json');
+        return commitTagPush(repo, branch, version);
+      });
+    });
+  }
+
+  function commitTagPush(repo, branch, version) {
+    var message = opts.message ? opts.message : type+' release '+version;
+    return _.gitCommit(repo, message).then(function() {
+      notify('Committed "'+message+'" ('+version+') to "'+branch+'"');
+      return _.tagsMake(repo, version).then(function() {
+        notify('Tagged "'+version+'"');
+        return _.gitPush(repo, opts.remote, branch).then(function() {
+          notify('Pushed to "'+opts.remote+'/'+branch+'"');
+          return _.gitPushTag(repo, opts.remote, version).then(function() {
+            notify('Pushed tag "'+version+'" to "'+opts.remote+'"');
+            if (branch == opts.mainBranch) {
+              return npmPublish(repo);
+            } else {
+              return branchMerge(repo, branch, version);
+            }
+          });
+        });
+      });
+    });
+  }
+
+  function branchMerge(repo, branch, version) {
+    return _.gitPush(repo, opts.remote, opts.mainBranch).then(function() {
+      notify('Pushed branch "'+branch+'" to "'+opts.remote+' '+opts.mainBranch+'"');
+      return branchClean(repo, branch, version);
+    });
+  }
+
+  function branchClean(repo, branch, version) {
+
+    return npmPublish(repo);
+
+    return branchCleanRemote(repo, branch, version);
+  }
+
+  function branchCleanRemote(repo, branch, version) {
+    return npmPublish(repo);
+  }
+
+  function npmPublish(repo) {
+
+  }
+
+  return doLeakRelease.promise;
 }
 
 if (require.main === module) {

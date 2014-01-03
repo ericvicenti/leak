@@ -266,3 +266,23 @@ _.checkPush = function checkPush(repoPath, remote, branch) {
   }).then(checkPushDone, checkPushDone);
 }
 
+_.deleteRemoteBranch = function deleteRemoteBranch(repoPath, remote, branch) {
+  function deleteRemoteBranchDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', ['push', remote, ':heads/'+branch], {
+    cwd: repoPath
+  }).then(deleteRemoteBranchDone, deleteRemoteBranchDone);
+}
+
+_.deleteRemoteTag = function deleteRemoteTag(repoPath, remote, tag) {
+  function deleteRemoteTagDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', ['push', remote, ':tags/'+tag], {
+    cwd: repoPath
+  }).then(deleteRemoteTagDone, deleteRemoteTagDone);
+}
+
