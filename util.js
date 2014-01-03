@@ -363,7 +363,6 @@ _.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, remote, bra
       return _.Q.allSettled(_.map(filteredTags, function(tag) {
         _.deleteRemoteTag(repoPath, remote, tag);
       })).then(function(results) {
-        console.log(results)
         return filteredTags;
       });
     });
