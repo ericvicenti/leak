@@ -142,7 +142,7 @@ module.exports = function(leak) {
         return _.getBranchName(repo).done(function(branch) {
           var confirmMessage;
           if (leakCli.remote) {
-            confirmMessage = '~ Really commit the above to heads/'+branch+' on and push to '+leakCli.remote+'?';
+            confirmMessage = '~ Really commit the above to heads/'+branch+' and push to '+leakCli.remote+'?';
           } else {
             confirmMessage = '~ Really commit the above to heads/'+branch+' ?';
           }
