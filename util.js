@@ -269,11 +269,11 @@ _.deleteRemoteRef = function deleteRemoteRef(repoPath, remote, ref) {
 }
 
 _.deleteRemoteBranch = function deleteRemoteBranch(repoPath, remote, branch) {
-  return deleteRemoteRef(repoPath, remote, 'heads/'+branch);
+  return _.deleteRemoteRef(repoPath, remote, 'heads/'+branch);
 }
 
 _.deleteRemoteTag = function deleteRemoteTag(repoPath, remote, tag) {
-  return deleteRemoteRef(repoPath, remote, 'tags/'+tag);
+  return _.deleteRemoteRef(repoPath, remote, 'tags/'+tag);
 }
 
 _.deleteBranch = function deleteBranch(repoPath, branch) {
