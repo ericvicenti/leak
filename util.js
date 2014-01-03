@@ -288,7 +288,6 @@ _.deleteBranch = function deleteBranch(repoPath, branch) {
 
 _.deleteTag = function deleteTag(repoPath, tag) {
   function deleteTagDone(out) {
-    console.log('done deleting tag '+tag);
     if (out.code == 0) return;
     else throw new Error(out.stderr);
   }
