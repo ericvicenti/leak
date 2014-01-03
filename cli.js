@@ -20,6 +20,13 @@ module.exports = function(leak) {
     if (leakCli[attr] === 'false') leakCli[attr] = false;
   });
 
+  console.log('--');
+
+  function closeCli(lastMessage) {
+    console.log(lastMessage);
+    console.log('--');
+  }
+
   _.getRepo().done(function(repo) {
 
     if (leakCli.start) {
@@ -32,7 +39,7 @@ module.exports = function(leak) {
 
       var branchName = leakCli.start;
 
-      console.log('LEAK START:');
+      console.log('Leak start:');
 
       leak.start(branchName, {
         main_branch: leakCli.mainBranch,
@@ -41,7 +48,7 @@ module.exports = function(leak) {
       }).progress(function(m) {
         console.log(' - '+m);
       }).done(function() {
-        console.log('LEAK START "'+branchName+'" DONE!');
+        closeCli('- Start "'+branchName+'" done!')
       });
 
       return; // end start section
@@ -66,11 +73,11 @@ module.exports = function(leak) {
         throw new Error('"'+releaseType+'" is not a valid release type! Must be "major", "minor", "patch", or "prerelease"');
       }
 
-      console.log('LEAK RELEASE: ');
+      console.log('- Leak release: ');
 
       if (leakCli.all) {
         _.gitStageAll(repo).done(function() {
-          console.log('- Staged all changes');
+          console.log(' - Staged all changes');
           goRelease();
         });
       } else {
@@ -88,7 +95,7 @@ module.exports = function(leak) {
         }).progress(function(m) {
           console.log(' - '+m);
         }).done(function() {
-          console.log('LEAK RELEASE DONE!');
+          closeCli('- Release done!');
         });
       }
 
@@ -110,7 +117,7 @@ module.exports = function(leak) {
           console.log('- Current Git Status: ');
           console.log(status);
           if (_.str.include(status, 'no changes added') || _.str.include(status, 'nothing to commit')) {
-            console.log('- Nothing staged to commit!');
+            closeCli('- Nothing staged to commit!');
             return;
           }
           goGetMessage();
@@ -119,6 +126,7 @@ module.exports = function(leak) {
 
       function goGetMessage() {
         if (message) {
+          console.log('- Commit Message: '+message);
           goCommitConfirmation(message, repo);
         } else {
           promptly.prompt('~ Commit Message: ', function (err, message) {
@@ -136,16 +144,16 @@ module.exports = function(leak) {
           } else {
             confirmMessage = '~ Really commit the above to heads/'+branch+' ?';
           }
-          promptly.confirm(confirmMessage, function(err, hasConfirmed) {
+          promptly.confirm(confirmMessage + ' (y/n) ', function(err, hasConfirmed) {
             if (err) throw err;
             if (hasConfirmed) goCommit(message, repo);
-            else console.log('Ok, maybe next time');
+            else closeCli('- Ok, maybe next time!');
           });
         });
       }
 
       function goCommit(message) {
-        console.log('LEAK COMMIT: ');
+        console.log('Leak commit: ');
         leak.commit({
           main_branch: leakCli.mainBranch,
           remote: leakCli.remote,
@@ -153,7 +161,7 @@ module.exports = function(leak) {
         }).progress(function(m) {
           console.log(' - '+m);
         }).done(function() {
-          console.log('LEAK COMMIT DONE!');
+          closeCli('- Commit Done!');
         });
       }
 
