@@ -1,6 +1,6 @@
 {
   "name": "leak",
-  "version": "0.0.19-makeworks.1",
+  "version": "0.0.20",
   "main": "leak.js",
   "author": "Eric Vicenti <ericvicenti@gmail.com>",
   "description": "Leak helps release semantically-versioned node packages from git branches.",
