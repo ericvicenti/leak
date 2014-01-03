@@ -25,7 +25,7 @@ module.exports = function(leak) {
 
     var branchName = leakCli.start;
 
-    console.log('LEAK STARTING "'+ leakCli.commit + '" ...');
+    console.log('LEAK STARTING "'+ branchName + '" ...');
 
     leak.start(branchName, {
       main_branch: leakCli.main_branch,
