@@ -242,9 +242,9 @@ leak.release = function leakRelease(type, opts) {
 
   function branchClean(repo, branch, version) {
     console.log("ASDC ", opts);
-    if (opts.clean) {
+    if (opts.doClean) {
       console.log('aa')
-      if (opts.cleanRemote) {
+      if (opts.doCleanRemote) {
       console.log('bb')
 
         return goBranchCleanRemote(repo, branch, version);
@@ -276,10 +276,17 @@ leak.release = function leakRelease(type, opts) {
   function prepareNpmPublish(repo) {
     if (_.isUndefined(opts.npmPublish)) {
       _.packageJsonGet(repo).done(function(packageJson) {
-        if (packageJson['private'] === false) goNpmPublish(repo);
+        var shouldPublish = packageJson['private'] === false;
+        if (shouldPublish) {
+          goNpmPublish(repo);
+        } else {
+          notify('Will not npm publish because private !== false');
+        }
       });
     } else if(opts.npmPublish) {
       goNpmPublish(repo);
+    } else {
+      notify('Will not npm publish');
     }
   }
 
