@@ -118,7 +118,7 @@ module.exports = function(leak) {
         _.gitStatus(repo).done(function(status) {
           console.log('- Current Git Status: ');
           console.log(status);
-          if (_.str.include(status, 'no changes added') || _.str.include(status, 'nothing to commit')) {
+          if (_.str.include(status, 'no changes added') || _.str.include(status, 'nothing to commit') || _.str.include(status, 'nothing added to commit')) {
             closeCli('- Nothing staged to commit!');
             return;
           }
