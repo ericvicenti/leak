@@ -312,7 +312,10 @@ leak.release = function leakRelease(type, opts) {
   }
 
   function goNpmPublish(repo) {
-    notify('would publish to npm!')
+    return _.npmPublish(repo).then(function(out) {
+      console.log(out);
+      notify('Published to npm')
+    });
   }
 
   return doLeakRelease.promise;
@@ -324,24 +327,3 @@ if (require.main === module) {
   // invoke cli
   require('./cli')(leak);
 }
-
-// _.getRepo().done(function(repo) {
-//   _.getRepoName(repo).done(function(repoName) {
-//     _.getBranchName(repo).done(function(branch) {
-//       promptly.confirm('Commit "'+message+'" to '+branch+' on '+repoName+'?', function (err, value) {
-//         if (err || !value) {
-//           console.log('Leak cancelled');
-//           return;
-//         }
-//         var remote = 'origin';
-//         var branch = 'master';
-//         console.log('Checking if push is OK');
-//         // _.checkPush(repo, remote, branch).then(function(a) {
-//         //   console.log('aaah ', a)
-//         // }, function(f) {
-//         //   console.log('Error! Cannot push to branch "'+branch+'" at remote "'+remote+'"');
-//         // });
-//       });
-//     });
-//   });
-// });

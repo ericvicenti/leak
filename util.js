@@ -367,3 +367,11 @@ _.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, remote, bra
     });
   });
 }
+
+_.npmPublish = function npmPublish(repoPath) {
+  return exec('npm', [ 'publish' ], {
+    cwd: repoPath
+  }).then(function(out) {
+    return out.stdout;
+  });
+}
