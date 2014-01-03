@@ -1,5 +1,7 @@
 # leak
 
+> "leaking itself since 2014"
+
 Leak helps release semantically-versioned node packages from git branches.
 
 __Status: Leak is unstable and should be used at your own risk.__
@@ -137,3 +139,12 @@ Commit can be combined with start or release, because a commit always happens to
 
 
 
+# More
+
+
+## Changelog
+
+### v0.1.0 - First release
+
+* main workflow: start, commit, release
+* now good enough to manage its own releases
