@@ -313,7 +313,6 @@ leak.release = function leakRelease(type, opts) {
 
   function goNpmPublish(repo) {
     return _.npmPublish(repo).then(function(out) {
-      console.log(out);
       notify('Published to npm')
     });
   }
