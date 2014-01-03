@@ -106,7 +106,7 @@ _.versionIncr = function versionIncr(repoPath, type) {
     });
   });
 }
-_.tagsGet = function getTags(repoPath) {
+_.getTags = function getTags(repoPath) {
   return exec('git', ['tag'], {
     cwd: repoPath
   }).then(function(results) {
@@ -119,7 +119,7 @@ _.tagsGet = function getTags(repoPath) {
   });
 }
 
-_.tagsMake = function tagsMake(repoPath, tagName) {
+_.makeTag = function tagsMake(repoPath, tagName) {
   function tagsMakeDone(out) {
     if (out.code == 0) return;
     else if (_.str.include(out.stderr, 'already exists')) throw new Error(out.stderr);
@@ -128,16 +128,6 @@ _.tagsMake = function tagsMake(repoPath, tagName) {
   return exec('git', ['tag', tagName], {
     cwd: repoPath
   }).then(tagsMakeDone, tagsMakeDone);
-}
-_.tagsRemove = function tagsRemove(repoPath, tagName) {
-  function tagsRemoveDone(out) {
-    if (out.code == 0) return;
-    else if (_.str.include(out.stderr, 'not found')) throw new Error(out.stderr);
-    else throw new Error('unexpected!');
-  }
-  return exec('git', ['tag', '-d', tagName], {
-    cwd: repoPath
-  }).then(tagsRemoveDone, tagsRemoveDone);
 }
 
 
@@ -286,6 +276,27 @@ _.deleteRemoteTag = function deleteRemoteTag(repoPath, remote, tag) {
   return deleteRemoteRef(repoPath, remote, 'tags/'+tag);
 }
 
+_.deleteBranch = function deleteBranch(repoPath, branch) {
+  function deleteBranchDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'branch', '-d', branch ], {
+    cwd: repoPath
+  }).then(deleteBranchDone, deleteBranchDone);
+}
+
+_.deleteTag = function deleteTag(repoPath, tag) {
+  function deleteTagDone(out) {
+    console.log('done deleting tag '+tag);
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'tag', '-d', tag ], {
+    cwd: repoPath
+  }).then(deleteTagDone, deleteTagDone);
+}
+
 _.fetchRemoteTags = function fetchRemoteTags(repoPath, remote) {
   // remote is optional. when it is undefined, git will fetch tags from all repos.
   function deleteRemoteRefDone(out) {
@@ -321,11 +332,35 @@ _.gitStageAll = function gitStageAll(repoPath) {
   });
 }
 
-_.deleteLocalBranchTags = function deleteLocalBranchTags(repoPath, branch) {
+_.doesTagMatchBranch = function doesTagMatchBranch(branch, tag) {
+  if (!_.isString(tag) || !_.isString(branch)) return false; 
+  var tagParts = tag.split('-');
+  var prereleaseTag = tagParts.pop();
+  var hasBranch = _.str.include(prereleaseTag, branch);
+  return hasBranch;
+}
 
+_.deleteBranchTags = function deleteBranchTags(repoPath, branch) {
+  return _.getTags(repoPath).then(function(tags) {
+    var filteredTags = _.filter(tags, function(tag) {
+      return _.doesTagMatchBranch(branch, tag);
+    });
+    return _.Q.all(_.map(filteredTags, function(tag) {
+      _.deleteTag(repoPath, tag);
+    })).then(function() {
+      return filteredTags;
+    });
+  });
 }
 
 _.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, branch, remote) {
-  // remote is optional. when it is undefined, we wipe branch tags from all repos.
-
+  return _.getTags(repoPath).then(function(myTags) {
+    console.log('GOT MYTAGS: '+myTags);
+    return _.getAllTags(repoPath, remote).then(function(allTags) {
+      console.log('GOT ALLTAGS: '+allTags);
+      var remoteTags = _.difference(allTags, myTags);
+      console.log('REMOTE TAGS: ', remoteTags);
+      return
+    });
+  });
 }

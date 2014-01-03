@@ -36,9 +36,7 @@ $ leak --help
 
 ## Setup
 
-Other than the following restrictions, leak should work fine with existing repositories.
-
-Leak can be run anywhere inside of a properly configured repository.
+Other than the following restrictions, leak should work fine with existing repositories and node modules.
 
 The `package.json` file must be present at the top-level of the repo and be valid JSON. The `version` value must be a proper [semantic version](http://semver.org/).
 

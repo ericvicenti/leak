@@ -93,7 +93,7 @@ leak.start = function leakStart(branchName, opts) {
       function publishVersion(version, message) {
         return _.gitCommit(repo, message).then(function() {
           notify('Committed "'+message+'" ('+version+') to "'+branchName+'"');
-          return _.tagsMake(repo, version).then(function() {
+          return _.makeTag(repo, version).then(function() {
             notify('Tagged "'+version+'"');
             return pushVersion(version);
           });
@@ -152,7 +152,7 @@ leak.commit = function leakCommit(opts) {
     var message = opts.message ? opts.message : version;
     return _.gitCommit(repo, message).then(function() {
       notify('Committed "'+message+'" ('+version+') to "'+branch+'"');
-      return _.tagsMake(repo, version).then(function() {
+      return _.makeTag(repo, version).then(function() {
         notify('Tagged "'+version+'"');
         return _.gitPush(repo, opts.remote, branch).then(function() {
           notify('Pushed to "'+opts.remote+'/'+branch+'"');
@@ -174,36 +174,15 @@ leak.release = function leakRelease(type, opts) {
     opts: {
       repo: repo path,
       remote: ,
-      main_branch: ,
+      mainBranch: ,
+      clean: bool.
+      cleanRemote:
+      npmPublish
     }
   */
-  /*
 
-    * notices the current $repo & $branch
-    * `git pull origin $branch`
-    * if branch is not `master`:
-      * `git pull origin master`
-    * increments the $version by $type in `package.json'
-    * stages `package.json`
-    * commits all staged changes with the $message provided, otherwise 'release $type $version'
-    * tag the commit with the new version
-    * pushes commits on $branch and the tag to `origin`
-    * if $branch is not `master`:
-      * push $branch to `origin master`
-      * checkout `master`, pull `origin master`
-      * if cleaning is enabled:
-        * remove all local tags which match: `X.X.X-$branch.X`
-        * remove the local $branch
-        * if remote cleaning is enabled:
-          * remove all remote tags which match: `X.X.X-$branch.X`
-          * remove the remote $branch
-    * if `private === false` in `package.json` or if npm is enabled
-      * `npm publish`
-
-  */
   opts = opts || {};
 
-  console.log('aa', opts);
   var doLeakRelease = _.Q.defer();
   var notify = doLeakRelease.notify;
 
@@ -237,7 +216,7 @@ leak.release = function leakRelease(type, opts) {
     var message = opts.message ? opts.message : type+' release '+version;
     return _.gitCommit(repo, message).then(function() {
       notify('Committed "'+message+'" ('+version+') to "'+branch+'"');
-      return _.tagsMake(repo, version).then(function() {
+      return _.makeTag(repo, version).then(function() {
         notify('Tagged "'+version+'"');
         return _.gitPush(repo, opts.remote, branch).then(function() {
           notify('Pushed to "'+opts.remote+'/'+branch+'"');
@@ -262,18 +241,50 @@ leak.release = function leakRelease(type, opts) {
   }
 
   function branchClean(repo, branch, version) {
+    console.log("ASDC ", opts);
+    if (opts.clean) {
+      console.log('aa')
+      if (opts.cleanRemote) {
+      console.log('bb')
 
-    return npmPublish(repo);
+        return goBranchCleanRemote(repo, branch, version);
+      } else {
+      console.log('cc')
 
-    return branchCleanRemote(repo, branch, version);
+        return goBranchClean(repo, branch, version)
+      }
+    } else {
+      return prepareNpmPublish(repo);
+    }
   }
 
-  function branchCleanRemote(repo, branch, version) {
-    return npmPublish(repo);
+  function goBranchCleanRemote(repo, branch, version) {
+    console.log('cleaning remote!')
+    return goBranchClean(repo, branch, version);
   }
 
-  function npmPublish(repo) {
+  function goBranchClean(repo, branch, version) {
+    return _.deleteBranchTags(repo, branch).then(function(tags) {
+      notify('Removed '+tags.length+' tags with "'+branch+'" label.')
+      return _.deleteBranch(repo, branch).then(function() {
+        notify('Removed branch "'+branch+'"');
+        return prepareNpmPublish(repo);
+      });
+    })
+  }
 
+  function prepareNpmPublish(repo) {
+    if (_.isUndefined(opts.npmPublish)) {
+      _.packageJsonGet(repo).done(function(packageJson) {
+        if (packageJson['private'] === false) goNpmPublish(repo);
+      });
+    } else if(opts.npmPublish) {
+      goNpmPublish(repo);
+    }
+  }
+
+  function goNpmPublish(repo) {
+    notify('would publish to npm!')
   }
 
   return doLeakRelease.promise;

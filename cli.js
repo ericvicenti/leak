@@ -30,6 +30,11 @@ module.exports = function(leak) {
 
   _.getRepo().done(function(repo) {
 
+    _.deleteBranchTags(repo, 'branch').done(function(a) {
+      console.log('aaa ', a);
+    });
+
+
     if (leakCli.start) {
 
       // === START: ===
