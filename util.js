@@ -149,12 +149,12 @@ _.getRepo = function getRepo(path) {
   });
 }
 
-_.gitPull = function gitPull(repoPath, originName, remoteBranchName) {
+_.gitPull = function gitPull(repoPath, remote, remoteBranchName) {
   function pullDone(out) {
     if (out.code == 0) return;
     else throw new Error(out.stderr);
   }
-  return exec('git', [ 'pull', originName, remoteBranchName ], {
+  return exec('git', [ 'pull', remote, remoteBranchName ], {
     cwd: repoPath
   }).then(pullDone, pullDone);
 }
