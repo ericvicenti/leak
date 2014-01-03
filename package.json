@@ -1,6 +1,6 @@
 {
   "name": "leak",
-  "version": "0.0.3-werk.0",
+  "version": "0.0.3-werk.1",
   "main": "leak.js",
   "author": "Eric Vicenti <ericvicenti@gmail.com>",
   "description": "Leak helps release semantically-versioned node packages from git branches.",
