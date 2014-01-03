@@ -189,14 +189,26 @@ _.gitAdd = function gitAdd(repoPath, fileName) {
   }).then(addDone, addDone);
 }
 
-_.gitPush = function gitPush(repoPath, originName, remoteBranchName) {
+_.gitPush = function gitPush(repoPath, remote, srcRef, destRef) {
+  if (!destRef) destRef = srcRef;
   function pushDone(out) {
     if (out.code == 0) return;
     else throw new Error(out.stderr);
   }
-  return exec('git', [ 'push', originName, remoteBranchName ], {
+  return exec('git', [ 'push', remote, srcRef+':'+destRef ], {
     cwd: repoPath
   }).then(pushDone, pushDone);
+}
+
+_.checkPush = function checkPush(repoPath, remote, srcRef, destRef) {
+  if (!destRef) destRef = srcRef;
+  function checkPushDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', ['push', '-n', remote, srcRef+':'+destRef], {
+    cwd: repoPath
+  }).then(checkPushDone, checkPushDone);
 }
 
 _.gitPushTag = function gitPushTag(repoPath, originName, tagName) {
@@ -256,33 +268,21 @@ _.getBranchName = function getBranchName(path) {
   }).then(tagsRemoveDone, tagsRemoveDone);
 }
 
-_.checkPush = function checkPush(repoPath, remote, branch) {
-  function checkPushDone(out) {
+_.deleteRemoteRef = function deleteRemoteRef(repoPath, remote, ref) {
+  function deleteRemoteRefDone(out) {
     if (out.code == 0) return;
     else throw new Error(out.stderr);
   }
-  return exec('git', ['push', '-n', remote, branch], {
+  return exec('git', ['push', remote, ':'+ref], {
     cwd: repoPath
-  }).then(checkPushDone, checkPushDone);
+  }).then(deleteRemoteRefDone, deleteRemoteRefDone);
 }
 
 _.deleteRemoteBranch = function deleteRemoteBranch(repoPath, remote, branch) {
-  function deleteRemoteBranchDone(out) {
-    if (out.code == 0) return;
-    else throw new Error(out.stderr);
-  }
-  return exec('git', ['push', remote, ':heads/'+branch], {
-    cwd: repoPath
-  }).then(deleteRemoteBranchDone, deleteRemoteBranchDone);
+  return deleteRemoteRef(repoPath, remote, 'heads/'+branch);
 }
 
 _.deleteRemoteTag = function deleteRemoteTag(repoPath, remote, tag) {
-  function deleteRemoteTagDone(out) {
-    if (out.code == 0) return;
-    else throw new Error(out.stderr);
-  }
-  return exec('git', ['push', remote, ':tags/'+tag], {
-    cwd: repoPath
-  }).then(deleteRemoteTagDone, deleteRemoteTagDone);
+  return deleteRemoteRef(repoPath, remote, 'tags/'+tag);
 }
 
