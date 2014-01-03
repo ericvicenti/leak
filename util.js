@@ -286,3 +286,30 @@ _.deleteRemoteTag = function deleteRemoteTag(repoPath, remote, tag) {
   return deleteRemoteRef(repoPath, remote, 'tags/'+tag);
 }
 
+_.fetchRemoteTags = function fetchRemoteTags(repoPath, remote) {
+  // remote is optional. when it is undefined, git will fetch tags from all repos.
+  function deleteRemoteRefDone(out) {
+    if (out.code == 0) return;
+    else throw new Error(out.stderr);
+  }
+  return exec('git', [ 'fetch', '--tags', remote ], {
+    cwd: repoPath
+  }).then(deleteRemoteRefDone, deleteRemoteRefDone);
+}
+
+_.getAllTags = function getAllTags(repoPath, remote) {
+  return _.fetchRemoteTags(repoPath, remote).then(function() {
+    return _.getTags(repoPath).then(function(tags) {
+      return tags;
+    });
+  })
+}
+
+_.deleteLocalBranchTags = function deleteLocalBranchTags(repoPath, branch) {
+
+}
+
+_.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, branch, remote) {
+  // remote is optional. when it is undefined, we wipe branch tags from all repos.
+
+}
