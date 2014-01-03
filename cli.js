@@ -23,6 +23,7 @@ module.exports = function(leak) {
   console.log('--');
 
   function closeCli(lastMessage) {
+    // cosmetic way of closing the cli
     console.log(lastMessage);
     console.log('--');
   }
@@ -31,15 +32,15 @@ module.exports = function(leak) {
 
     if (leakCli.start) {
 
+      // === START: ===
+
+      console.log('- Leak start:');
+
       if (leakCli.release) {
         throw new Error('Cannot start and release at the same time!');
       }
 
-      action = 'start';
-
       var branchName = leakCli.start;
-
-      console.log('Leak start:');
 
       leak.start(branchName, {
         main_branch: leakCli.mainBranch,
@@ -54,7 +55,6 @@ module.exports = function(leak) {
       return; // end start section
     }
 
-    var action = 'commit'; // commit is the default action
     var message = null;
 
     if (_.isString(leakCli.commit)) {
@@ -62,8 +62,11 @@ module.exports = function(leak) {
     }
 
 
-
     if (leakCli.release) {
+
+      // === RELEASE: ===
+      console.log('- Leak release: ');
+
       var releaseType = leakCli.release;
       if (releaseType === true) {
         releaseType = 'patch';
@@ -72,8 +75,6 @@ module.exports = function(leak) {
       if (!_.contains(validReleaseTypes, releaseType)) {
         throw new Error('"'+releaseType+'" is not a valid release type! Must be "major", "minor", "patch", or "prerelease"');
       }
-
-      console.log('- Leak release: ');
 
       if (leakCli.all) {
         _.gitStageAll(repo).done(function() {
@@ -101,7 +102,8 @@ module.exports = function(leak) {
 
     } else {
 
-      // COMMIT:
+      // === COMMIT: ===
+      console.log('- Leak commit: ');
 
       if (leakCli.all) {
         _.gitStageAll(repo).done(function() {
@@ -153,7 +155,6 @@ module.exports = function(leak) {
       }
 
       function goCommit(message) {
-        console.log('Leak commit: ');
         leak.commit({
           main_branch: leakCli.mainBranch,
           remote: leakCli.remote,
