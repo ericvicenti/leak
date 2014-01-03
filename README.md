@@ -135,4 +135,3 @@ Commit can be combined with start or release, because a commit always happens to
   * if set to `false`, npm will not publish
   * by default, publish if [private](https://npmjs.org/doc/files/package.json.html#private) is `false` in `package.json`
 
-
