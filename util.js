@@ -359,8 +359,16 @@ _.deleteRemoteBranchTags = function deleteRemoteBranchTags(repoPath, branch, rem
     return _.getAllTags(repoPath, remote).then(function(allTags) {
       console.log('GOT ALLTAGS: '+allTags);
       var remoteTags = _.difference(allTags, myTags);
-      console.log('REMOTE TAGS: ', remoteTags);
-      return
+      var filteredTags = _.filter(allTags, function(tag) {
+        return _.doesTagMatchBranch(branch, tag);
+      });
+      console.log('filteredTags TAGS: ', filteredTags);
+      return _.Q.allSettled(_.map(filteredTags, function(tag) {
+        _.deleteRemoteTag(repoPath, remote, tag);
+      })).then(function(results) {
+        console.log(results)
+        return filteredTags;
+      });
     });
   });
 }

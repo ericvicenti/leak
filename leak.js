@@ -262,16 +262,10 @@ leak.release = function leakRelease(type, opts) {
   }
 
   function branchClean(repo, branch, version) {
-    console.log("ASDC ", opts);
     if (opts.doClean) {
-      console.log('aa')
       if (opts.doCleanRemote) {
-      console.log('bb')
-
         return goBranchCleanRemote(repo, branch, version);
       } else {
-      console.log('cc')
-
         return goBranchClean(repo, branch, version)
       }
     } else {
@@ -280,8 +274,14 @@ leak.release = function leakRelease(type, opts) {
   }
 
   function goBranchCleanRemote(repo, branch, version) {
-    console.log('cleaning remote!')
-    return goBranchClean(repo, branch, version);
+    notify('cleaning remote');
+    return _.deleteRemoteBranchTags(repo, branch).then(function(tags) {
+      notify('Removed '+tags.length+' remote tags with "'+branch+'" label.')
+      return _.deleteRemoteBranch(repo, branch).then(function() {
+        notify('Removed remote branch "'+branch+'"');
+        return goBranchClean(repo, branch, version);
+      });
+    });
   }
 
   function goBranchClean(repo, branch, version) {
@@ -291,7 +291,7 @@ leak.release = function leakRelease(type, opts) {
         notify('Removed branch "'+branch+'"');
         return prepareNpmPublish(repo);
       });
-    })
+    });
   }
 
   function prepareNpmPublish(repo) {
