@@ -236,7 +236,9 @@ leak.release = function leakRelease(type, opts) {
   function branchMerge(repo, branch, version) {
     return _.gitPush(repo, opts.remote, branch, opts.mainBranch).then(function() {
       notify('Pushed branch "'+branch+'" to "'+opts.remote+' '+opts.mainBranch+'"');
-      return branchClean(repo, branch, version);
+      return _.gitCheckout(repo, opts.mainBranch).then(function() {
+        return branchClean(repo, branch, version);
+      });
     });
   }
 

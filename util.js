@@ -221,7 +221,7 @@ _.gitCheckout = function gitCheckout(repoPath, branchName) {
   }).then(checkoutDone, checkoutDone);
 }
 
-_.gitNewBranch = function gitCheckout(repoPath, branchName) {
+_.gitNewBranch = function gitNewBranch(repoPath, branchName) {
   function newBranchDone(out) {
     if (out.code == 0) return;
     else throw new Error(out.stderr);
