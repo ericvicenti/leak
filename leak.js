@@ -194,15 +194,30 @@ leak.release = function leakRelease(type, opts) {
         if (branch == opts.mainBranch) {
           return releaseVersion(repo, branch);
         } else {
-          return _.gitPull(repo, opts.remote, opts.mainBranch).then(function() {
-            return releaseVersion(repo, branch);
-          });
+          return syncMainBranch(repo, branch);
         }
       });
     });
   }).then(doLeakRelease.resolve, doLeakRelease.reject);
 
+  function syncMainBranch(repo, branch) {
+    notify('Start pull '+opts.remote+' '+opts.mainBranch+':');
+    return _.gitPull(repo, opts.remote, opts.mainBranch).then(function() {
+      notify('Done with git pull '+opts.remote+' '+opts.mainBranch);
+      notify('Start checkout '+opts.mainBranch+':');
+      return _.gitCheckout(repo, opts.mainBranch).then(function() {
+        notify('Done with checkout '+opts.mainBranch);
+        notify('Start checkout '+branch+':');
+        return _.gitCheckout(repo, branch).then(function() {
+          notify('Done with checkout '+branch);
+          return releaseVersion(repo, branch);
+        });
+      });
+    });
+  }
+
   function releaseVersion(repo, branch) {
+    notify('Incrementing version:');
     return _.versionIncr(repo, type).then(function(version) {
       notify('Incremented to '+version);
       return _.packageJsonStage(repo).then(function() {

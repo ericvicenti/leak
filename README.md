@@ -105,6 +105,8 @@ Commit can be combined with start or release, because a commit always happens to
 * `git pull origin $branch`
 * if branch is not `master`:
   * `git pull origin master`
+  * checkout master to make sure working copy doesn't conflict
+  * checkout $branch again
 * increments the $version by $type in `package.json'
 * stages `package.json`
 * commits all staged changes with the $message provided, otherwise 'release $type $version'
