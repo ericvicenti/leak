@@ -99,7 +99,7 @@ Commit can be combined with start or release, because a commit always happens to
 
 ## -R --release [type]
 
-"Release the current branch to remote master and npm"
+"Release the currently-staged branch to remote master and npm, then wipe the branch and old tags"
 
 ### Release Behavior
 

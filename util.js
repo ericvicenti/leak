@@ -30,7 +30,7 @@ var fsWriteJson = function(fileName, data) {
 }
 
 function exec(command, args, opts) {
-  console.log('STARTING EXEC ', command, args);
+  // console.log('STARTING EXEC ', command, args);
   var doExec = _.Q.defer();
   var process = spawn(command, args, opts);
   var output = {
@@ -45,7 +45,7 @@ function exec(command, args, opts) {
   });
   process.on('close', function (code) {
     output.code = code;
-    console.log('EXEC RESPONSE ', command, args, output);
+    // console.log('EXEC RESPONSE ', command, args, output);
     if (code == 0) doExec.resolve(output);
     else doExec.reject(output);
   });
@@ -303,6 +303,22 @@ _.getAllTags = function getAllTags(repoPath, remote) {
       return tags;
     });
   })
+}
+
+_.gitStatus = function gitStatus(repoPath) {
+  return exec('git', [ 'status' ], {
+    cwd: repoPath
+  }).then(function(out) {
+    return out.stdout;
+  });
+}
+
+_.gitStageAll = function gitStageAll(repoPath) {
+  return exec('git', [ 'add', '*.*' ], {
+    cwd: repoPath
+  }).then(function(out) {
+    return out.stdout;
+  });
 }
 
 _.deleteLocalBranchTags = function deleteLocalBranchTags(repoPath, branch) {
