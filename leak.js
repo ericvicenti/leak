@@ -274,7 +274,7 @@ leak.release = function leakRelease(type, opts) {
   }
 
   function goBranchCleanRemote(repo, branch, version) {
-    notify('cleaning remote');
+    notify('Cleaning remote tags');
     return _.deleteRemoteBranchTags(repo, opts.remote, branch).then(function(tags) {
       notify('Removed '+tags.length+' remote tags with "'+branch+'" label.')
       return _.deleteRemoteBranch(repo, opts.remote, branch).then(function() {
@@ -296,10 +296,10 @@ leak.release = function leakRelease(type, opts) {
 
   function prepareNpmPublish(repo) {
     if (_.isUndefined(opts.npmPublish)) {
-      _.packageJsonGet(repo).done(function(packageJson) {
+      return _.packageJsonGet(repo).then(function(packageJson) {
         var shouldPublish = packageJson['private'] === false;
         if (shouldPublish) {
-          goNpmPublish(repo);
+          return goNpmPublish(repo);
         } else {
           notify('Will not npm publish because private !== false');
         }
