@@ -248,14 +248,14 @@ _.getRepoName = function getRepoName(path) {
 }
 
 _.getBranchName = function getBranchName(path) {
-  function tagsRemoveDone(out) {
+  function getBranchNameDone(out) {
     if (out.code == 0) return out.stdout.trim();
     else if (_.str.include(out.stderr, 'not found')) throw new Error(out.stderr);
     else throw new Error('unexpected!');
   }
   return exec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
     cwd: path
-  }).then(tagsRemoveDone, tagsRemoveDone);
+  }).then(getBranchNameDone, getBranchNameDone);
 }
 
 _.deleteRemoteRef = function deleteRemoteRef(repoPath, remote, ref) {
