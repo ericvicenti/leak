@@ -251,7 +251,7 @@ _.getBranchName = function getBranchName(path) {
   function getBranchNameDone(out) {
     if (out.code == 0) return out.stdout.trim();
     else if (_.str.include(out.stderr, 'not found')) throw new Error(out.stderr);
-    else throw new Error('unexpected!');
+    else throw new Error('Error checking HEAD version!');
   }
   return exec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
     cwd: path

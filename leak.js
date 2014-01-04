@@ -145,8 +145,6 @@ leak.commit = function leakCommit(opts) {
           });
         });
       });
-    }, function() {
-      throw new Error('Cannot determine HEAD branch!');
     });
   }).then(doLeakCommit.resolve, doLeakCommit.reject);
 
